@@ -1,5 +1,16 @@
 # Changelog
 
+## 58.0.19
+
+### Patch Changes
+
+- Fix invalid CSS transformer output when (unstable) graph optimization is enabled. ([#52382](https://github.com/expo/expo/pull/52382) by [@github-actions](https://github.com/apps/github-actions))
+- Update to `noxcturnal@^0.1.11` ([`413f72a`](https://github.com/expo/expo/commit/413f72a0712c69fbfb8309e33954bceb8e646e72) by [@kitten](https://github.com/kitten))
+- Reduce Noxcturnal visitor overhead by filtering matching nodes before they reach JavaScript. ([`413f72a`](https://github.com/expo/expo/commit/413f72a0712c69fbfb8309e33954bceb8e646e72) by [@kitten](https://github.com/kitten))
+- Updated dependencies. ([`09e03b6`](https://github.com/expo/expo/commit/09e03b6e523a3acb10c1ac7488b43674db7e54dc))
+  - @expo/require-utils@58.0.5
+  - @expo/config@58.0.9
+
 ## 58.0.18
 
 ### Patch Changes

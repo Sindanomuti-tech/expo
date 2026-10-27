@@ -1,5 +1,13 @@
 # Changelog
 
+## 58.1.7
+
+### Patch Changes
+
+- Updated dependencies.
+  - @expo/image-utils@0.12.6
+  - expo-constants@58.0.14
+
 ## 58.1.6
 
 ### Patch Changes
