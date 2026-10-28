@@ -1,78 +1,214 @@
----
-title: 'Tutorial: Using React Native and Expo'
-sidebar_title: Introduction
-description: An introduction to a React Native tutorial on how to build a universal app with Expo, Expo Router, and Expo UI that runs on Android, iOS, and web.
----
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, SafeAreaView, Alert } from 'react-native';
 
-import { BoxLink } from '~/ui/components/BoxLink';
-import { ContentSpotlight } from '~/ui/components/ContentSpotlight';
-import { HandWaveIcon } from '~/ui/components/CustomIcons/HandWaveIcon';
+export default function App() {
+  // Lista de produtos de exemplo para o PDV (Cantina / Retalho)
+  const [produtos] = useState([
+    { id: '1', nome: 'Cerveja Cuca 33cl', preco: 450 },
+    { id: '2', nome: 'Água Pura 1.5L', preco: 250 },
+    { id: '3', nome: 'Pacote de Bolacha', preco: 300 },
+    { id: '4', nome: 'Refrigerante 33cl', preco: 400 },
+  ]);
 
-We're about to embark on a journey of building universal apps. In this tutorial, we'll create an Expo app that runs on Android, iOS, and web, all with a single codebase. Let's get started!
+  // Carrinho de compras
+  const [carrinho, setCarrinho] = useState([]);
 
-> **info** **New to programming?** You can build this same app by prompting an AI coding agent instead of writing the code yourself. Follow the [Build with AI tutorial](/tutorial/build-with-ai/introduction/). It covers setup from scratch.
+  // Adicionar produto ao carrinho
+  const adicionarAoCarrinho = (produto) => {
+    setCarrinho([...carrinho, produto]);
+  };
 
-## About React Native and Expo tutorial
+  // Calcular o total da fatura
+  const calcularTotal = () => {
+    return carrinho.reduce((soma, item) => soma + item.preco, 0);
+  };
 
-The objective of this tutorial is to get started with Expo and become familiar with the Expo SDK. It'll cover the following topics:
+  // Emitir Fatura / Simulação AGT
+  const emitirFatura = () => {
+    if (carrinho.length === 0) {
+      Alert.alert("Atenção", "O carrinho está vazio!");
+      return;
+    }
+    const total = calcularTotal();
+    Alert.alert(
+      "Fatura Emitida com Sucesso!",
+      `Total: ${total} Kz\nHash AGT: [OK-VERIFICADO]\nCódigo QR gerado para o cliente.`
+    );
+    setCarrinho([]); // Limpa o carrinho após emissão
+  };
 
-- Create an app using the default template with TypeScript enabled
-- Implement a two-screen layout with native tabs from Expo Router
-- Break down the app layout and implement it with flexbox
-- Build native buttons with Expo UI, and use platform-specific files for Android, iOS, and web
-- Use each platform's system UI to select an image from the media library
-- Create an emoji picker with the bottom sheet from Expo UI and the `<FlatList>` component from React Native
-- Add touch gestures to interact with a sticker
-- Use third-party libraries to capture a screenshot, save it to the media library on Android and iOS, and download it on the web
-- Finally, go through the process of configuring a status bar, a splash screen, and an icon to complete the app
-
-These topics provide a foundation to learn the fundamentals of building an Expo app. The tutorial is self-paced and can take up to two hours to complete.
-
-The app uses native UI from each platform. [Expo UI](/versions/latest/sdk/ui/) brings Jetpack Compose and SwiftUI components to React Native, and it works in Expo Go. On Android, the tab bar, the buttons, and the bottom sheet use Material 3. On iOS 26 and later, the tab bar uses Liquid Glass. On web, the app uses React Native components.
-
-To keep it beginner friendly, we divided the tutorial into eight chapters so that you can follow along or put it down and come back to it later. Each chapter contains the necessary code snippets to complete the steps, so you can follow along by creating an app from scratch or copy and paste it.
-
-Before we get started, take a look at what we'll build. It's an app named **StickerSmash** that runs on Android, iOS, and web:
-
-<ContentSpotlight file="tutorial/final.mp4" />
-
-> **info** The complete source code for this tutorial is available on [GitHub](https://github.com/expo/examples/tree/master/stickersmash).
-
-## How to use this tutorial
-
-We believe in [learning by doing](https://en.wikipedia.org/wiki/Learning-by-doing), so this tutorial emphasizes doing over explaining. You can follow along the journey of building an app by creating the app from scratch.
-
-Throughout the tutorial, any important code or code that has changed between examples will be <span className="tutorial-code-annotation">highlighted in green</span>. You can hover over the highlights (on desktop) or tap them (on mobile) to learn more about the change. For example, the code highlighted in the snippet below explains what it does:
-
-{/* prettier-ignore */}
-```tsx Hello World|collapseHeight=300
-import { StyleSheet, Text, View } from 'react-native';
-
-export default function Index() {
   return (
-    <View style={styles.container}>
-      /* @tutinfo This used to say "Edit src/app/index.tsx to edit this screen." Now it says "Hello world!" */<Text>Hello world!</Text>/* @end */
-    </View>
+    <SafeAreaView style={styles.container}>
+      {/* Cabeçalho com identidade visual AGT Pagamento */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>AGT Pagamento</Text>
+        <Text style={styles.headerSub}>Sistema de Faturação Certificado</Text>
+      </View>
+
+      {/* Secção de Produtos (Botões de toque rápido) */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Toque para adicionar ao cesto:</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.produtosScroll}>
+          {produtos.map((p) => (
+            <TouchableOpacity 
+              key={p.id} 
+              style={styles.produtoCard}
+              onPress={() => adicionarAoCarrinho(p)}
+            >
+              <Text style={styles.produtoNome}>{p.nome}</Text>
+              <Text style={styles.produtoPreco}>{p.preco} Kz</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* Resumo do Carrinho / Venda Atual */}
+      <View style={styles.carrinhoContainer}>
+        <Text style={styles.sectionTitle}>Itens na Fatura Atual:</Text>
+        <ScrollView style={styles.carrinhoLista}>
+          {carrinho.length === 0 ? (
+            <Text style={styles.carrinhoVazio}>Nenhum produto selecionado.</Text>
+          ) : (
+            carrinho.map((item, index) => (
+              <View key={index} style={styles.carrinhoItem}>
+                <Text style={styles.itemTexto}>{item.nome}</Text>
+                <Text style={styles.itemTexto}>{item.preco} Kz</Text>
+              </View>
+            ))
+          )}
+        </ScrollView>
+      </View>
+
+      {/* Rodapé com Total e Botão de Emissão */}
+      <View style={styles.footer}>
+        <View style={styles.totalRow}>
+          <Text style={styles.totalLabel}>Total a Pagar:</Text>
+          <Text style={styles.totalValor}>{calcularTotal()} Kz</Text>
+        </View>
+
+        <TouchableOpacity style={styles.botaoEmitir} onPress={emitirFatura}>
+          <Text style={styles.botaoEmitirTexto}>EMITIR FATURA AGT</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#F5F7FA',
+  },
+  header: {
+    backgroundColor: '#004AAD',
+    padding: 20,
     alignItems: 'center',
-    justifyContent: 'center',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+  headerTitle: {
+    color: '#FFF',
+    fontSize: 22,
+    fontWeight: 'bold',
+  },
+  headerSub: {
+    color: '#E0E0E0',
+    fontSize: 12,
+    marginTop: 4,
+  },
+  section: {
+    padding: 15,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 10,
+  },
+  produtosScroll: {
+    flexDirection: 'row',
+  },
+  produtoCard: {
+    backgroundColor: '#FFF',
+    padding: 15,
+    borderRadius: 10,
+    marginRight: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    minWidth: 120,
+  },
+  produtoNome: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#1E293B',
+    textAlign: 'center',
+  },
+  produtoPreco: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#004AAD',
+    marginTop: 5,
+  },
+  carrinhoContainer: {
+    flex: 1,
+    paddingHorizontal: 15,
+    marginBottom: 10,
+  },
+  carrinhoLista: {
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  carrinhoVazio: {
+    color: '#94A3B8',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  carrinhoItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  itemTexto: {
+    fontSize: 14,
+    color: '#334155',
+  },
+  footer: {
+    backgroundColor: '#FFF',
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+  },
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+  totalLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  totalValor: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#0F172A',
+  },
+  botaoEmitir: {
+    backgroundColor: '#004AAD',
+    padding: 16,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  botaoEmitirTexto: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
-```
 
-## Next step
-
-We're ready to start building our app.
-
-<BoxLink
-  title="Start"
-  Icon={HandWaveIcon}
-  description="Let's start by creating a new Expo app."
-  href="/tutorial/create-your-first-app"
-/>
